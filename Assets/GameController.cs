@@ -11,11 +11,16 @@ public class GameController : MonoBehaviour
             if (obj != null && obj.GetComponent<Unit>() is Unit u)
                 u.Select(Input.GetKey(KeyCode.LeftShift));
             else
+            {
+                var command = new Command(CommandType.Move, worldPos);
                 foreach (var unit in Unit.unitList)
                 {
                     if (unit.IsSelected)
-                        unit.Move(worldPos);
+                    {
+                        unit.executeCommand(command);
+                    }
                 }
+            }
         }
         else if (Input.GetMouseButtonUp(1))
         {

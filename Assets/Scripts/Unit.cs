@@ -55,4 +55,17 @@ public class Unit : MonoBehaviour
     {
         target = destination;
     }
+
+    public void executeCommand(Command command)
+    {
+        switch (command.CommandType)
+        {
+            case CommandType.Move:
+                Move(command.Position);
+                break;
+            
+            default:
+                break;
+        }
+    }
 }
