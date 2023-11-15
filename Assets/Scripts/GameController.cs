@@ -20,8 +20,8 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.S))
         {
-            foreach(var unit in activePlayer.UnitList)
-                unit.Stop();
+            var command = new Command(CommandType.Stop);
+            activePlayer.SendCommandToSelectedUnits(command);
         }
     }
 
