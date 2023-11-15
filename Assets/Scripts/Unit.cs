@@ -1,4 +1,5 @@
 using Pathfinding;
+using System.Data;
 using UnityEngine;
 
 [RequireComponent(typeof(AIDestinationSetter))]
@@ -62,5 +63,20 @@ public class Unit : MonoBehaviour
         destinationSetter.target = null;
     }
 
+    public void ExecuteCommand(Command command)
+    {
+        switch (command.Type)
+        {
+            case CommandType.Move:
+                Move(command.Position);
+                break;
 
+            case CommandType.Stop:
+                Stop();
+                break;
+
+            default:
+                break;
+        }
+    }
 }

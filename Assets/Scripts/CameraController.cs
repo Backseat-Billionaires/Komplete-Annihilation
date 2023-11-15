@@ -126,11 +126,10 @@ public class CameraController : MonoBehaviour
 
             // Else tell selected units to move to cursor
             else
-                foreach (var unit in activePlayer.UnitList)
-                {
-                    if (unit.IsSelected)
-                        unit.Move(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-                }
+            {
+                var command = new Command(CommandType.Move, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                activePlayer.SendCommandToSelectedUnits(command);
+            }
         }
 
         // Right click

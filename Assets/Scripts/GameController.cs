@@ -50,15 +50,6 @@ public class GameController : MonoBehaviour
         var player = new Player(commander.GetComponent<Unit>());
         players[playerIndex] = player;
 
-        for (int i = 0; i < 8; i++)
-        {
-            var x = Random.Range(8, 184);
-            var y = Random.Range(8, -184);
-            var location = new Vector3(x, y, 0);
-            var unit = Instantiate(commanderPrefab, location, Quaternion.identity);
-            player.AddUnit(unit.GetComponent<Unit>());
-        }
-
         if(spawnOptions.IsActivePlayer)
         {
             if (!Camera.main.TryGetComponent<CameraController>(out var cameraController)) throw new System.Exception("Unable to find main camera.");

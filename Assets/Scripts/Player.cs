@@ -16,4 +16,13 @@ public class Player
         unit.player = this;
         UnitList.Add(unit);
     }
+
+    public void SendCommandToSelectedUnits(Command command)
+    {
+        foreach (Unit unit in UnitList)
+        {
+            if (unit.IsSelected)
+                unit.ExecuteCommand(command);
+        }
+    }
 }
