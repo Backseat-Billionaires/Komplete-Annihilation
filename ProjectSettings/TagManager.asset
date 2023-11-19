@@ -8,10 +8,10 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Pathfinding Obstacle
   - Water
   - UI
-  - 
+  - Ground Unit
   - 
   - 
   - 
@@ -40,4 +40,10 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Map
+    uniqueID: 409943121
+    locked: 0
+  - name: Units
+    uniqueID: 2560542333
     locked: 0
