@@ -24,8 +24,8 @@ public class CameraController : MonoBehaviour
         boundaryMax = new Vector2(Mathf.Max(panLimitMin.x, panLimitMax.x), Mathf.Max(panLimitMin.y, panLimitMax.y));
 
         // Calculate max zoom
-        var maxZoomX = Mathf.Abs(boundaryMax.x - boundaryMin.x) / 4;
-        var maxZoomY = Mathf.Abs(boundaryMax.y - boundaryMin.y) / 4;
+        var maxZoomX = Mathf.Abs(boundaryMax.x - boundaryMin.x) / 6;
+        var maxZoomY = Mathf.Abs(boundaryMax.y - boundaryMin.y) / 6;
         maxZoom = Mathf.Min(maxZoomX, maxZoomY);
     }
 
@@ -67,14 +67,14 @@ public class CameraController : MonoBehaviour
             var panAmount = Camera.main.orthographicSize * edgePanMultiplier * Time.deltaTime;
 
             // Move the camera if the mouse is at the edge of the screen
-            //if (Input.mousePosition.y >= Screen.height - 1)
-            //    pos.y += panAmount;
-            //if (Input.mousePosition.y <= 1)
-            //    pos.y -= panAmount;
-            //if (Input.mousePosition.x >= Screen.width - 1)
-            //    pos.x += panAmount;
-            //if (Input.mousePosition.x <= 1)
-            //    pos.x -= panAmount;
+            if (Input.mousePosition.y >= Screen.height - 1)
+                pos.y += panAmount;
+            if (Input.mousePosition.y <= 1)
+                pos.y -= panAmount;
+            if (Input.mousePosition.x >= Screen.width - 1)
+                pos.x += panAmount;
+            if (Input.mousePosition.x <= 1)
+                pos.x -= panAmount;
 
             // Clamp the position
             pos.x = Mathf.Clamp(pos.x, panLimitMin.x + mainCamera.orthographicSize * mainCamera.aspect, panLimitMax.x - mainCamera.orthographicSize * mainCamera.aspect);
