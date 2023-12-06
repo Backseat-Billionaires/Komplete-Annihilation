@@ -1,10 +1,9 @@
-
 using Pathfinding;
 using UnityEngine;
 
 [RequireComponent(typeof(AIDestinationSetter))]
 [RequireComponent(typeof(AIPath))]
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, IGameSelectable
 {
     // Editor fields
     public bool canMove;
@@ -21,11 +20,8 @@ public class Unit : MonoBehaviour
     private Vector2 lastPosition;
     private float flipMultiplier; // Used to flip the sprite based on the default facing direction
 
-    public bool IsSelected => selected;
-
     void Start()
     {
-        selected = false;
         destinationSetter = GetComponent<AIDestinationSetter>();
         ai = GetComponent<AIPath>();
         cameraController = FindObjectOfType<CameraController>(); // Find the CameraController in the scene
@@ -47,37 +43,50 @@ public class Unit : MonoBehaviour
         lastPosition = currentPosition; // Update the last position for the next frame
     }
 
-    public void Select(bool multi = false)
+    public void Select(bool multi)
     {
         if (!multi)
         {
-            foreach (var unit in player.UnitList)
+            DeselectOthers(); // Deselect all other units if not multi-select
+        }
+        selected = true;
+        selectedSquare.SetActive(true);
+    }
+
+    // Deselect all other selected units of the same player
+    private void DeselectOthers()
+    {
+        foreach (var unit in player.UnitList)
+        {
+            if (unit.IsSelected() && unit != this)
             {
-                if (unit.selected)
-                {
-                    unit.Deselect();
-                }
+                unit.Deselect();
             }
         }
-        SelectInternal(true);
+    }
+
+    // IGameSelectable interface implementation
+    public void Select()
+    {
+        Select(true); // Default to multi-select being true
     }
 
     public void Deselect()
     {
-        SelectInternal(false);
+        selected = false;
+        selectedSquare.SetActive(false);
     }
 
-    private void SelectInternal(bool setIsSelected)
+    public bool IsSelected()
     {
-        selected = setIsSelected;
-        selectedSquare.SetActive(setIsSelected);
+        return selected;
     }
 
     public void Move(Vector3 destination)
     {
         if (canMove)
         {
-            Debug.Log("[Unit] Move command received"); // Debugging log
+            Debug.Log("[Unit] Move command received");
             ai.destination = destination;
         }
     }
@@ -86,7 +95,7 @@ public class Unit : MonoBehaviour
     {
         if (canStop)
         {
-            Debug.Log("[Unit] Stop command received"); // Debugging log
+            Debug.Log("[Unit] Stop command received");
             ai.SetPath(null);
             ai.destination = Vector3.positiveInfinity;
             destinationSetter.target = null;
