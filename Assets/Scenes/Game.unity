@@ -449,11 +449,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cb08ccc3fa381444a30f57e6e3b8fe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  edgePanMultiplier: 1
+  edgePanMultiplier: 2
   zoomSpeed: 30
   minZoom: 15
   panLimitMin: {x: 0, y: 0}
   panLimitMax: {x: 192, y: -192}
+  characterToFollow: {fileID: 1143254025}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -536,6 +537,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1143254025 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2567427119382360053, guid: 8aa4def5f13ac7542b968452907a471c, type: 3}
+  m_PrefabInstance: {fileID: 133075448}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1223473847 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2766279400485648013, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
@@ -665,6 +671,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -81103607258765713, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -81103607258765713, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
+      propertyPath: m_TagString
+      value: Metal
+      objectReference: {fileID: 0}
     - target: {fileID: 1724750361529845258, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
       propertyPath: m_CellSize.x
       value: 0.32
@@ -724,6 +738,14 @@ PrefabInstance:
     - target: {fileID: 2149252664840061378, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3280930960203172171, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3280930960203172171, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
+      propertyPath: m_TagString
+      value: Metal
       objectReference: {fileID: 0}
     - target: {fileID: 5107002804593978283, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
       propertyPath: m_SortingLayer

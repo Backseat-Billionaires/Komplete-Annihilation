@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
     private Player activePlayer;
     private bool isInitialized;
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -50,7 +51,7 @@ public class GameController : MonoBehaviour
         var player = new Player(commander.GetComponent<Unit>());
         players[playerIndex] = player;
 
-        if(spawnOptions.IsActivePlayer)
+        if (spawnOptions.IsActivePlayer)
         {
             if (!Camera.main.TryGetComponent<CameraController>(out var cameraController)) throw new System.Exception("Unable to find main camera.");
             if (cameraController.activePlayer != null) throw new System.Exception("Scene already has an active player.");
@@ -59,8 +60,12 @@ public class GameController : MonoBehaviour
             cameraController.activePlayer = player;
             activePlayer = player;
 
+            // Set the CameraController's character to follow
+            cameraController.characterToFollow = commander.transform;
+
             // Move camera, which will automatically clamp to screen.
             cameraController.transform.position = new Vector3(spawnPoint.x, spawnPoint.y, cameraController.transform.position.z);
         }
     }
+
 }

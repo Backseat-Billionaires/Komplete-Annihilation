@@ -15,6 +15,8 @@ public class CameraController : MonoBehaviour
     private Vector2 boundaryMin;
     private Vector2 boundaryMax;
 
+
+    public Transform characterToFollow;
     void Start()
     {
         mainCamera = Camera.main;
@@ -41,6 +43,13 @@ public class CameraController : MonoBehaviour
 
         // Update the last mouse position
         lastMousePosition = Input.mousePosition;
+
+
+        // Press C to focus on the Commander
+        if (Input.GetKeyDown(KeyCode.C) && characterToFollow != null)
+        {
+            CenterCameraOnCharacter();
+        }
     }
 
     void HandlePan()
@@ -153,5 +162,15 @@ public class CameraController : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void CenterCameraOnCharacter()
+    {
+        if (characterToFollow != null)
+        {
+            Vector3 characterPosition = characterToFollow.position;
+            characterPosition.z = transform.position.z; // Keep the camera's current z-position
+            transform.position = characterPosition;
+        }
     }
 }
