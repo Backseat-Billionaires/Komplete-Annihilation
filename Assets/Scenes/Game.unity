@@ -620,7 +620,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a58079273274dc4b8090dfc58ae3d1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceManagement: {fileID: 1735140147}
   metalText: {fileID: 1709971518}
   energyText: {fileID: 1702285}
 --- !u!4 &382757855
@@ -1429,6 +1428,11 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &740862913 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7618935859042028521, guid: fd357ee8384c13945be04d1926616c89, type: 3}
+  m_PrefabInstance: {fileID: 833930834889462689}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &791322209 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -999345696321432765, guid: 9acdfc170e99a1d48b65bf9b6f11e55e, type: 3}
@@ -2479,7 +2483,7 @@ MonoBehaviour:
   map: {fileID: 1223473851}
   commanderPrefab: {fileID: 3442594686835289996, guid: 8aa4def5f13ac7542b968452907a471c, type: 3}
   playerPrefab: {fileID: 1735140144}
-  minePrefab: {fileID: 0}
+  minePrefab: {fileID: 740862913}
 --- !u!4 &1297984765
 Transform:
   m_ObjectHideFlags: 0
@@ -4355,13 +4359,31 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1918105794327210535, guid: fd357ee8384c13945be04d1926616c89, type: 3}
       insertIndex: -1
       addedObject: {fileID: 980527831}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7618935859042028521, guid: fd357ee8384c13945be04d1926616c89, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 833930834889462693}
   m_SourcePrefab: {fileID: 100100000, guid: fd357ee8384c13945be04d1926616c89, type: 3}
 --- !u!4 &833930834889462690 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1918105794327210535, guid: fd357ee8384c13945be04d1926616c89, type: 3}
   m_PrefabInstance: {fileID: 833930834889462689}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &833930834889462693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740862913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67cbf5f81326fe843ad86d1144eb785a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  metalPerSecond: 1
+  maxHealth: 100
+  selectedIndicator: {fileID: 980527830}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
