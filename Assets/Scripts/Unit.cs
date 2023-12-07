@@ -1,46 +1,43 @@
 using Pathfinding;
 using UnityEngine;
+using Mirror;
 
 [RequireComponent(typeof(AIDestinationSetter))]
 [RequireComponent(typeof(AIPath))]
-public class Unit : MonoBehaviour, IGameSelectable
+public class Unit : NetworkBehaviour, IGameSelectable
 {
     // Editor fields
     public bool canMove;
     public bool canStop;
-    public Player player;
-    public bool facesRightByDefault = true; // Indicates if the sprite faces right by default
+    public bool canAttack;
+    public bool isCombatUnit;
+    public bool isConstructorUnit;
+    public bool facesRightByDefault = true;
 
     [SerializeField]
     private GameObject selectedSquare;
     private AIDestinationSetter destinationSetter;
     private AIPath ai;
-    private CameraController cameraController; // Reference to the CameraController
     private Vector2 lastPosition;
-    private float flipMultiplier; // Used to flip the sprite based on the default facing direction
-    private bool selected; // Tracks selection state
+    private float flipMultiplier;
+    private bool selected;
 
     void Start()
     {
         destinationSetter = GetComponent<AIDestinationSetter>();
         ai = GetComponent<AIPath>();
-        cameraController = FindObjectOfType<CameraController>(); // Find the CameraController in the scene
         lastPosition = transform.position;
-        flipMultiplier = facesRightByDefault ? 1f : -1f; // Set the flip multiplier based on the default facing direction
+        flipMultiplier = facesRightByDefault ? 1f : -1f;
     }
 
     void Update()
     {
         Vector2 currentPosition = transform.position;
-
-        // Check for horizontal movement
-        if (currentPosition.x != lastPosition.x) // If the unit has moved horizontally
+        if (currentPosition.x != lastPosition.x)
         {
-            // Flip the unit based on the movement direction
             transform.localScale = new Vector3(Mathf.Sign(currentPosition.x - lastPosition.x) * flipMultiplier, 1, 1);
         }
-
-        lastPosition = currentPosition; // Update the last position for the next frame
+        lastPosition = currentPosition;
     }
 
     // IGameSelectable interface implementation
@@ -48,14 +45,14 @@ public class Unit : MonoBehaviour, IGameSelectable
     {
         selected = true;
         selectedSquare.SetActive(true);
-        FindObjectOfType<GameController>().AddToSelectedObjects(this);
+        FindObjectOfType<UnitSelectionManager>().SelectObject(gameObject);
     }
 
     public void Deselect()
     {
         selected = false;
         selectedSquare.SetActive(false);
-        FindObjectOfType<GameController>().RemoveFromSelectedObjects(this);
+        FindObjectOfType<UnitSelectionManager>().DeselectObject(gameObject);
     }
 
     public bool IsSelected()
@@ -63,39 +60,83 @@ public class Unit : MonoBehaviour, IGameSelectable
         return selected;
     }
 
-    public void Move(Vector3 destination)
+    [Command]
+    public void CmdMove(Vector3 destination)
     {
         if (canMove)
         {
-            Debug.Log("[Unit] Move command received");
-            ai.destination = destination;
+            RpcMove(destination);
         }
     }
 
-    public void Stop()
+    [Command]
+    public void CmdStop()
     {
         if (canStop)
         {
-            Debug.Log("[Unit] Stop command received");
-            ai.SetPath(null);
-            ai.destination = Vector3.positiveInfinity;
-            destinationSetter.target = null;
+            RpcStop();
         }
+    }
+
+    [Command]
+    public void CmdAttack(GameObject target)
+    {
+        if (canAttack && target != null)
+        {
+            // Implement attack logic here, e.g., set target, start attack coroutine
+        }
+    }
+
+    [ClientRpc]
+    void RpcMove(Vector3 destination)
+    {
+        ai.destination = destination;
+    }
+
+    [ClientRpc]
+    void RpcStop()
+    {
+        ai.SetPath(null);
+        ai.destination = Vector3.positiveInfinity;
+        destinationSetter.target = null;
     }
 
     public void ExecuteCommand(Command command)
     {
+        if (!isServer) return;
+
         switch (command.Type)
         {
             case CommandType.Move:
-                Move(command.Position);
+                CmdMove(command.Position);
                 break;
             case CommandType.Stop:
-                Stop();
+                CmdStop();
                 break;
-            default:
-                // Handle other command types if necessary
+            case CommandType.Attack:
+                if (command.Target != null)
+                {
+                    CmdAttack(command.Target);
+                }
                 break;
+            // Implement additional command types as needed
+        }
+    }
+
+    // Methods for K-Bot functionality (placeholder implementations)
+    public void ConstructBuilding(GameObject buildingPrefab, Vector3 position)
+    {
+        if (isConstructorUnit)
+        {
+            // Construction logic for K-Bots
+        }
+    }
+
+    public void HealUnit(GameObject target)
+    {
+        if (isConstructorUnit)
+        {
+            // Healing logic for K-Bots
         }
     }
 }

@@ -1,14 +1,15 @@
 using UnityEngine;
+using Mirror;
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
     public float edgePanMultiplier = 1f;
     public float zoomSpeed = 30f;
     public float minZoom = 15f;
     private float maxZoom;
 
-    public Vector2 panLimitMin = new(0f, 0f);
-    public Vector2 panLimitMax = new(192f, -192f);
+    public Vector2 panLimitMin = new Vector2(0f, 0f);
+    public Vector2 panLimitMax = new Vector2(192f, -192f);
     private Vector3 lastMousePosition;
     private Vector2 boundaryMin;
     private Vector2 boundaryMax;
@@ -16,37 +17,38 @@ public class CameraController : MonoBehaviour
     public Transform characterToFollow;
     public Player activePlayer;
     private Camera mainCamera;
-
+    private UnitSelectionManager selectionManager;
+    private CommandExecutor commandExecutor;
 
     void Start()
     {
         mainCamera = Camera.main;
+        selectionManager = FindObjectOfType<UnitSelectionManager>();
+        commandExecutor = FindObjectOfType<CommandExecutor>();
 
-        // Calculate boundaries
         boundaryMin = new Vector2(Mathf.Min(panLimitMin.x, panLimitMax.x), Mathf.Min(panLimitMin.y, panLimitMax.y));
         boundaryMax = new Vector2(Mathf.Max(panLimitMin.x, panLimitMax.x), Mathf.Max(panLimitMin.y, panLimitMax.y));
 
-        // Calculate max zoom
         var maxZoomX = Mathf.Abs(boundaryMax.x - boundaryMin.x) / 6;
         var maxZoomY = Mathf.Abs(boundaryMax.y - boundaryMin.y) / 6;
         maxZoom = Mathf.Min(maxZoomX, maxZoomY);
+
+        if (!isOwned)
+        {
+            mainCamera.enabled = false;
+        }
     }
 
     void Update()
     {
-        // Handle camera zooming
+        if (!isOwned) return;
+
         HandleZoom();
-
-        // Handle camera panning
         HandlePan();
-
         HandleClick();
 
-        // Update the last mouse position
         lastMousePosition = Input.mousePosition;
 
-
-        // Press C to focus on the Commander
         if (Input.GetKeyDown(KeyCode.C) && characterToFollow != null)
         {
             CenterCameraOnCharacter();
@@ -131,53 +133,41 @@ public class CameraController : MonoBehaviour
             var obj = GetObjectAtCursor();
 
             // Check for unit selection
-            if (obj != null && obj.GetComponent<Unit>() is Unit unit)
+            if (obj != null)
             {
-                if (Input.GetKey(KeyCode.LeftShift))
+                if (obj.TryGetComponent<Unit>(out Unit unit))
                 {
-                    // Shift key held, add to selection without clearing existing selection
-                    unit.Select();
+                    selectionManager.SelectObject(obj, Input.GetKey(KeyCode.LeftShift));
+                }
+                else if (obj.TryGetComponent<MetalDeposit>(out MetalDeposit deposit))
+                {
+                    selectionManager.SelectObject(obj);
                 }
                 else
                 {
-                    // Shift key not held, clear existing selection and select the unit
-                    FindObjectOfType<GameController>().DeselectAll();
-                    unit.Select();
+                    // Issue move command
+                    var command = new Command(CommandType.Move, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                    commandExecutor.ExecuteCommand(command, activePlayer);
                 }
-            }
-            // Check for metal deposit selection
-            else if (obj != null && obj.GetComponent<MetalDeposit>() is MetalDeposit deposit)
-            {
-                deposit.Select(); // Select the metal deposit
-            }
-            // Else, issue move command
-            else
-            {
-                var command = new Command(CommandType.Move, Camera.main.ScreenToWorldPoint(Input.mousePosition));
-                activePlayer.SendCommandToSelectedUnits(command);
             }
         }
 
         // Right click
         else if (Input.GetMouseButtonUp(1))
         {
-            // Deselect all units and metal deposits
-            FindObjectOfType<GameController>().DeselectAll();
+            selectionManager.DeselectAll();
         }
     }
-
-
-
-    public static GameObject GetObjectAtCursor()
+    
+    private static GameObject GetObjectAtCursor()
     {
         int layerObject = 8;
-        Vector2 ray = new(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
-        RaycastHit2D hit = Physics2D.Raycast(ray, ray, layerObject);
+        Vector2 ray = new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
+        RaycastHit2D hit = Physics2D.Raycast(ray, Vector2.zero, Mathf.Infinity, layerObject);
         if (hit.collider != null)
         {
             return hit.collider.gameObject;
         }
-
         return null;
     }
 

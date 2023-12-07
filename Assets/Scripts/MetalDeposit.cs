@@ -1,35 +1,33 @@
 using UnityEngine;
+using Mirror;
 
-public class MetalDeposit : MonoBehaviour, IGameSelectable
+public class MetalDeposit : NetworkBehaviour, IGameSelectable
 {
     [SerializeField]
-    private GameObject selectedIndicator; // Assign in Inspector
+    private GameObject selectedIndicator;
     private bool isSelected = false;
-    public bool HasMine { get; private set; } = false;
 
-    private GameController gameController;
+    [SyncVar]
+    public bool HasMine = false;
 
     private void Start()
     {
-        gameController = FindObjectOfType<GameController>();
         if (selectedIndicator != null)
-            selectedIndicator.SetActive(false); // Ensure the indicator is not visible initially
+            selectedIndicator.SetActive(false);
     }
 
     public void Select()
     {
         isSelected = true;
-        gameController.AddToSelectedObjects(this);
         if (selectedIndicator != null)
-            selectedIndicator.SetActive(true); // Show selection indicator
+            selectedIndicator.SetActive(true);
     }
 
     public void Deselect()
     {
         isSelected = false;
-        gameController.RemoveFromSelectedObjects(this);
         if (selectedIndicator != null)
-            selectedIndicator.SetActive(false); // Hide selection indicator
+            selectedIndicator.SetActive(false);
     }
 
     public bool IsSelected()
@@ -37,16 +35,18 @@ public class MetalDeposit : MonoBehaviour, IGameSelectable
         return isSelected;
     }
 
-    public void PlaceMine(GameObject minePrefab, Player owner)
+    [Server]
+    public void PlaceMine(GameObject minePrefab, GameObject owner)
     {
         if (!HasMine)
         {
             GameObject newMineObject = Instantiate(minePrefab, transform.position, Quaternion.identity);
+            NetworkServer.Spawn(newMineObject);
             Mine newMine = newMineObject.GetComponent<Mine>();
 
             if (newMine != null)
             {
-                newMine.Initialize(owner, this);
+                newMine.Initialize(owner);
                 HasMine = true;
             }
             else
