@@ -161,12 +161,20 @@ public class GameController : MonoBehaviour
 
     public void DeselectAll()
     {
-        foreach (var selectable in selectedObjects)
+        // Create a temporary list to store objects that need to be deselected
+        var objectsToDeselect = new List<IGameSelectable>(selectedObjects);
+
+        // Iterate over the temporary list to deselect objects
+        foreach (var selectable in objectsToDeselect)
         {
             selectable.Deselect();
         }
+
+        // Clear the selectedObjects list after all objects have been deselected
         selectedObjects.Clear();
     }
+
+
 
     private void TryPlaceMine()
     {
