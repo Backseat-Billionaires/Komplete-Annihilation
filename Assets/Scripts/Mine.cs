@@ -2,14 +2,16 @@ using UnityEngine;
 
 public class Mine : MonoBehaviour, IGameSelectable
 {
-    public int metalPerSecond = 1; // The amount of metal generated per second
-    public int maxHealth = 100; // Maximum health of the mine
-    public Player owner; // The player who owns the mine
-
-    private ResourceManagement resourceManagement; // Reference to the ResourceManagement script
+    public int metalPerSecond = 1;
+    public int maxHealth = 100;
     private int currentHealth;
+    private Player owner;
+    private ResourceManagement resourceManagement;
     private bool isSelected = false;
-    
+
+    [SerializeField]
+    private GameObject selectedIndicator; // Assign in Inspector
+
     void Start()
     {
         resourceManagement = owner.GetComponent<ResourceManagement>();
@@ -19,8 +21,11 @@ public class Mine : MonoBehaviour, IGameSelectable
             return;
         }
 
-        currentHealth = maxHealth; // Initialize the mine's health
-        InvokeRepeating(nameof(GenerateResource), 1f, 1f); // Start generating resources every second
+        currentHealth = maxHealth;
+        InvokeRepeating(nameof(GenerateResource), 1f, 1f);
+
+        if (selectedIndicator != null)
+            selectedIndicator.SetActive(false); // Initial state
     }
 
     void GenerateResource()
@@ -32,28 +37,33 @@ public class Mine : MonoBehaviour, IGameSelectable
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
-        {
             DestroyMine();
-        }
     }
 
     private void DestroyMine()
     {
-        // Optional: Add logic for when the mine is destroyed, like playing an animation or effect
-        Destroy(gameObject); // Remove the mine from the game
+        Destroy(gameObject);
+    }
+
+    // Initialize the mine with the owner and metal deposit
+    public void Initialize(Player owner, MetalDeposit deposit)
+    {
+        this.owner = owner;
     }
 
     // IGameSelectable implementation
     public void Select()
     {
         isSelected = true;
-        // Optional: Add visual indication of selection, like highlighting
+        if (selectedIndicator != null)
+            selectedIndicator.SetActive(true);
     }
 
     public void Deselect()
     {
         isSelected = false;
-        // Optional: Remove visual indication of selection
+        if (selectedIndicator != null)
+            selectedIndicator.SetActive(false);
     }
 
     public bool IsSelected()

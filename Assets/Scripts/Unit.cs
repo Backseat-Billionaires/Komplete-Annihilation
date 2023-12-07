@@ -15,10 +15,10 @@ public class Unit : MonoBehaviour, IGameSelectable
     private GameObject selectedSquare;
     private AIDestinationSetter destinationSetter;
     private AIPath ai;
-    private bool selected;
     private CameraController cameraController; // Reference to the CameraController
     private Vector2 lastPosition;
     private float flipMultiplier; // Used to flip the sprite based on the default facing direction
+    private bool selected; // Tracks selection state
 
     void Start()
     {
@@ -43,38 +43,19 @@ public class Unit : MonoBehaviour, IGameSelectable
         lastPosition = currentPosition; // Update the last position for the next frame
     }
 
-    public void Select(bool multi)
-    {
-        if (!multi)
-        {
-            DeselectOthers(); // Deselect all other units if not multi-select
-        }
-        selected = true;
-        selectedSquare.SetActive(true);
-    }
-
-    // Deselect all other selected units of the same player
-    private void DeselectOthers()
-    {
-        foreach (var unit in player.UnitList)
-        {
-            if (unit.IsSelected() && unit != this)
-            {
-                unit.Deselect();
-            }
-        }
-    }
-
     // IGameSelectable interface implementation
     public void Select()
     {
-        Select(true); // Default to multi-select being true
+        selected = true;
+        selectedSquare.SetActive(true);
+        FindObjectOfType<GameController>().AddToSelectedObjects(this);
     }
 
     public void Deselect()
     {
         selected = false;
         selectedSquare.SetActive(false);
+        FindObjectOfType<GameController>().RemoveFromSelectedObjects(this);
     }
 
     public bool IsSelected()

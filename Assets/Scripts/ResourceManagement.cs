@@ -5,6 +5,8 @@ public class ResourceManagement : MonoBehaviour
     public int Metal { get; private set; }
     public int Energy { get; private set; }
 
+    private const int MineCost = 10;
+
     void Start()
     {
         Metal = 50;
@@ -39,5 +41,18 @@ public class ResourceManagement : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public bool CanAffordMineCost()
+    {
+        return Metal >= MineCost;
+    }
+
+    public void SpendResourcesForMine()
+    {
+        if (CanAffordMineCost())
+        {
+            UseMetal(MineCost);
+        }
     }
 }

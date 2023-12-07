@@ -6,29 +6,20 @@ public class GameController : MonoBehaviour
 {
     public Map map;
     public GameObject commanderPrefab;
-    public GameObject playerPrefab; 
+    public GameObject playerPrefab;
+    public GameObject minePrefab; // Assign in Inspector
+    private GameObject selectedMetalDeposit;
 
     private Player[] players = null;
     private Player activePlayer;
     private bool isInitialized;
-
-
-
-    public GameObject minePrefab; // Assign in Inspector
-    private GameObject selectedMetalDeposit;
-
-
-
     private List<IGameSelectable> selectedObjects = new List<IGameSelectable>();
 
-
-    // Start is called before the first frame update
     void Start()
     {
         Initialize(1);
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.S))
@@ -37,9 +28,19 @@ public class GameController : MonoBehaviour
             activePlayer.SendCommandToSelectedUnits(command);
         }
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            HandleClick();
+        }
+
         if (Input.GetKeyDown(KeyCode.M) && selectedMetalDeposit != null)
         {
             TryPlaceMine();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            DeselectAll();
         }
     }
 
@@ -98,7 +99,19 @@ public class GameController : MonoBehaviour
         }
     }
 
-
+    private void HandleClick()
+    {
+        var obj = GetObjectAtCursor();
+        if (obj != null)
+        {
+            SelectObject(obj);
+            // Update selectedMetalDeposit if a metal deposit is clicked
+            if (obj.GetComponent<MetalDeposit>() != null)
+            {
+                selectedMetalDeposit = obj;
+            }
+        }
+    }
 
     public void SelectObject(GameObject obj)
     {
@@ -107,19 +120,16 @@ public class GameController : MonoBehaviour
         {
             if (selectable.IsSelected())
             {
-                // Already selected, so deselect it
                 selectable.Deselect();
                 selectedObjects.Remove(selectable);
             }
             else
             {
-                // Select it and add it to the list
                 selectable.Select();
                 selectedObjects.Add(selectable);
             }
         }
 
-        // Enforce rules for selection
         EnforceSelectionRules();
     }
 
@@ -149,7 +159,14 @@ public class GameController : MonoBehaviour
         }
     }
 
-
+    private void DeselectAll()
+    {
+        foreach (var selectable in selectedObjects)
+        {
+            selectable.Deselect();
+        }
+        selectedObjects.Clear();
+    }
 
     private void TryPlaceMine()
     {
@@ -174,6 +191,29 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void AddToSelectedObjects(IGameSelectable selectable)
+    {
+        if (!selectedObjects.Contains(selectable))
+        {
+            selectedObjects.Add(selectable);
+        }
+    }
 
+    public void RemoveFromSelectedObjects(IGameSelectable selectable)
+    {
+        selectedObjects.Remove(selectable);
+    }
 
+    private GameObject GetObjectAtCursor()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
+
+        if (hit.collider != null)
+        {
+            return hit.collider.gameObject;
+        }
+
+        return null;
+    }
 }

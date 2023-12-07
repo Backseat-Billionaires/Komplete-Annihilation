@@ -146,10 +146,11 @@ public class CameraController : MonoBehaviour
         {
             // Deselect all units
             foreach (var unit in activePlayer.UnitList)
-                if (unit.IsSelected)
+                if (unit.IsSelected())
                     unit.Deselect();
         }
     }
+
 
     public static GameObject GetObjectAtCursor()
     {

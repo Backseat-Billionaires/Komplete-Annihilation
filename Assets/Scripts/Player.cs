@@ -38,10 +38,11 @@ public class Player : MonoBehaviour
     {
         foreach (Unit unit in UnitList)
         {
-            if (unit.IsSelected)
+            if (unit.IsSelected())
             {
                 unit.ExecuteCommand(command);
             }
         }
     }
+
 }
