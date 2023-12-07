@@ -5,18 +5,19 @@ public class CameraController : MonoBehaviour
     public float edgePanMultiplier = 1f;
     public float zoomSpeed = 30f;
     public float minZoom = 15f;
+    private float maxZoom;
+
     public Vector2 panLimitMin = new(0f, 0f);
     public Vector2 panLimitMax = new(192f, -192f);
-    public Player activePlayer;
-
-    private Camera mainCamera;
     private Vector3 lastMousePosition;
-    private float maxZoom;
     private Vector2 boundaryMin;
     private Vector2 boundaryMax;
 
-
     public Transform characterToFollow;
+    public Player activePlayer;
+    private Camera mainCamera;
+
+
     void Start()
     {
         mainCamera = Camera.main;
@@ -129,11 +130,27 @@ public class CameraController : MonoBehaviour
         {
             var obj = GetObjectAtCursor();
 
-            // Select unit(s)
-            if (obj != null && obj.GetComponent<Unit>() is Unit u)
-                u.Select(Input.GetKey(KeyCode.LeftShift));
-
-            // Else tell selected units to move to cursor
+            // Check for unit selection
+            if (obj != null && obj.GetComponent<Unit>() is Unit unit)
+            {
+                if (Input.GetKey(KeyCode.LeftShift))
+                {
+                    // Shift key held, add to selection without clearing existing selection
+                    unit.Select();
+                }
+                else
+                {
+                    // Shift key not held, clear existing selection and select the unit
+                    FindObjectOfType<GameController>().DeselectAll();
+                    unit.Select();
+                }
+            }
+            // Check for metal deposit selection
+            else if (obj != null && obj.GetComponent<MetalDeposit>() is MetalDeposit deposit)
+            {
+                deposit.Select(); // Select the metal deposit
+            }
+            // Else, issue move command
             else
             {
                 var command = new Command(CommandType.Move, Camera.main.ScreenToWorldPoint(Input.mousePosition));
@@ -144,12 +161,11 @@ public class CameraController : MonoBehaviour
         // Right click
         else if (Input.GetMouseButtonUp(1))
         {
-            // Deselect all units
-            foreach (var unit in activePlayer.UnitList)
-                if (unit.IsSelected())
-                    unit.Deselect();
+            // Deselect all units and metal deposits
+            FindObjectOfType<GameController>().DeselectAll();
         }
     }
+
 
 
     public static GameObject GetObjectAtCursor()

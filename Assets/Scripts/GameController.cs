@@ -159,7 +159,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void DeselectAll()
+    public void DeselectAll()
     {
         foreach (var selectable in selectedObjects)
         {
