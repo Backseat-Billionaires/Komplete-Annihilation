@@ -9,15 +9,23 @@ public class Mine : NetworkBehaviour
 
     [SyncVar]
     private GameObject owner;
-
-    private const int cost = 100; // Cost to place the mine
+    
     private const float resourceGenerationRate = 1.0f; // 1 metal resource per second
 
     private Health healthComponent;
     private GameObject visualIndicator; // For selection indication
     
     private Selectable selectableComponent; // Reference to the Selectable component
-    public static int MaxActiveMinesPerPlayer = 8; // Maximum number of active mines a player can have
+    
+    private bool isSelected;
+    
+    void OnMouseDown() 
+    {
+        // Only allow selection interactions for the local player
+        if (!isOwned) return;
+
+        CmdToggleSelection();
+    }
 
     public override void OnStartServer()
     {
@@ -28,6 +36,7 @@ public class Mine : NetworkBehaviour
         }
         else
         {
+            healthComponent.OnDeath += HandleMineDestruction;
             StartCoroutine(GenerateResource());
         }
         
@@ -66,22 +75,52 @@ public class Mine : NetworkBehaviour
         visualIndicator = visualInstance; // Store reference for selection indication
     }
 
+    private void HandleMineDestruction(GameObject attacker)
+    {
+        // Notify the owner's inventory to decrement the active mine count
+        if (owner != null)
+        {
+            PlayerInventory ownerInventory = owner.GetComponent<PlayerInventory>();
+            if (ownerInventory != null)
+            {
+                ownerInventory.DecrementActiveMines();
+            }
+        }
+
+        // Destroy the mine object
+        NetworkServer.Destroy(gameObject);
+    }
+
     public void Select()
     {
         if (selectableComponent != null)
         {
             selectableComponent.SetSelected(true); // Select using the Selectable component
+            visualIndicator.SetActive(true);
         }
     }
-
 
     public void Deselect()
     {
         if (selectableComponent != null)
         {
             selectableComponent.SetSelected(false); // Deselect using the Selectable component
+            visualIndicator.SetActive(false);
         }
     }
-
-    // Additional methods or properties can be added here
+    
+    [Command]
+    private void CmdToggleSelection()
+    {
+        //Toggle selection state on the server
+        if (isSelected)
+        {
+            Deselect();
+        }
+        else
+        {
+            Select();
+        }
+    }
+    
 }

@@ -13,7 +13,7 @@ public class MetalDeposit : NetworkBehaviour
 
     private const int mineCost = 100; // Cost to place the mine
 
-    private void Start()
+    private void Awake()
     {
         selectableComponent = GetComponent<Selectable>();
         if (selectableComponent == null)
@@ -25,6 +25,12 @@ public class MetalDeposit : NetworkBehaviour
     [Server]
     public void TryPlaceMine(GameObject owner)
     {
+        if (!isOwned)
+        {
+            Debug.LogError("Attempted to place mine without authority.");
+            return;
+        }
+
         PlayerInventory ownerInventory = owner.GetComponent<PlayerInventory>();
         if (ownerInventory == null)
         {
@@ -34,13 +40,15 @@ public class MetalDeposit : NetworkBehaviour
 
         if (ownerInventory.GetActiveMines() >= PlayerInventory.MaxActiveMinesPerPlayer)
         {
-            Debug.Log("Reached maximum number of active mines.");
+            // Provide feedback to the player
+            SendFeedbackToPlayer(owner, "Maximum number of active mines reached.");
             return;
         }
 
         if (!IsOwnerInRange(owner) || !ownerInventory.HasEnoughResources(mineCost))
         {
-            Debug.Log("Not enough resources or owner not in range to place a mine.");
+            // Provide feedback to the player
+            SendFeedbackToPlayer(owner, "Not enough resources or not in range to place a mine.");
             return;
         }
 
@@ -48,7 +56,7 @@ public class MetalDeposit : NetworkBehaviour
         {
             ownerInventory.UseResources(mineCost); // Deduct cost from player's resources
             GameObject newMineObject = Instantiate(minePrefab, transform.position, Quaternion.identity);
-            NetworkServer.Spawn(newMineObject);
+            NetworkServer.Spawn(newMineObject, owner);
             Mine newMine = newMineObject.GetComponent<Mine>();
 
             if (newMine != null)
@@ -70,20 +78,22 @@ public class MetalDeposit : NetworkBehaviour
         return Vector3.Distance(owner.transform.position, transform.position) <= placementRange;
     }
 
-    public void SetMineOwner(GameObject owner)
+    private void SendFeedbackToPlayer(GameObject player, string message)
     {
-        _mineOwner = owner;
+        // Implement a method to send feedback to the player (e.g., through UI or a console log)
+        Debug.Log(message);
     }
 
     public void Select(GameObject owner)
     {
-        SetMineOwner(owner);
-        selectableComponent.SetSelected(true); // Use Selectable component for visual indication
+        if (owner == _mineOwner)
+        {
+            selectableComponent.SetSelected(true); // Use Selectable component for visual indication
+        }
     }
 
     public void Deselect()
     {
-        _mineOwner = null;
         selectableComponent.SetSelected(false); // Use Selectable component for visual indication
     }
 }

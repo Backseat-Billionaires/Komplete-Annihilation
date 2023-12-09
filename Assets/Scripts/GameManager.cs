@@ -96,6 +96,20 @@ public class GameManager : NetworkBehaviour
         // Optional: Implement logic to reset or conclude the game
         // For example, reset the game state or disconnect all players
     }
+    
+    public void SetupPlayer(GameObject playerObject, NetworkConnectionToClient conn)
+    {
+        // Additional player setup logic goes here
+        // Example: Initialize player score
+        playerScores[conn.connectionId] = 0;
+    }
+
+    public void HandlePlayerDisconnect(GameObject playerObject)
+    {
+        // Handle player disconnect logic here
+        // Example: Remove player from game and clean up
+        NetworkServer.Destroy(playerObject);
+    }
 
     // Add additional methods here as needed
 }

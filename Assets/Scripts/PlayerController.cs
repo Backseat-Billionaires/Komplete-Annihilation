@@ -6,17 +6,17 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private float movementSpeed = 5f;
     [SerializeField]
-    private LayerMask interactableLayer; // Define a LayerMask for interactable objects
+    private LayerMask interactableLayer;
     [SerializeField]
-    private int attackDamage = 10; // Damage dealt by the player's attack
+    private int attackDamage = 10;
     [SerializeField]
-    private float attackRange = 2f; // Range of the player's attack
+    private float attackRange = 2f;
 
     private Camera playerCamera;
     private MetalDeposit selectedMetalDeposit;
     private CharacterController characterController;
     private Health healthComponent;
-    private Map map; // Reference to the Map class for spawn points
+    private Map map;
 
     void Start()
     {
@@ -39,14 +39,13 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!isLocalPlayer || healthComponent.GetCurrentHealth() <= 0) return;
 
         HandleMovement();
         HandleInteractionInput();
         HandleMinePlacementInput();
         HandleAttackInput();
     }
-
     private void HandleMovement()
     {
         float horizontal = Input.GetAxis("Horizontal");
@@ -83,15 +82,22 @@ public class PlayerController : NetworkBehaviour
 
     private void TryAttack()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, attackRange, interactableLayer))
+        if (TryGetTarget(out RaycastHit hit, attackRange))
         {
-            Mine mine = hit.collider.GetComponent<Mine>();
-            if (mine != null)
-            {
-                CmdAttackMine(mine.gameObject);
-            }
+            GameObject target = hit.collider.gameObject;
+
+            // Retrieve the PlayerWeapons component and get the current weapon
+            PlayerWeapons playerWeapons = GetComponent<PlayerWeapons>();
+            Weapon currentWeapon = playerWeapons.GetCurrentWeapon(); // Assuming GetCurrentWeapon() is implemented
+
+            // Use CombatManager to handle the attack
+            CombatManager.Instance.PerformAttack(gameObject, target, currentWeapon);
         }
+    }
+
+    private bool TryGetTarget(out RaycastHit hit, float range)
+    {
+        return Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, range, interactableLayer);
     }
 
     

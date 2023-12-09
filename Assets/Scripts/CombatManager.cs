@@ -2,6 +2,20 @@ using UnityEngine;
 
 public class CombatManager : MonoBehaviour
 {
+    public static CombatManager Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
     public void PerformAttack(GameObject attacker, GameObject target, Weapon currentWeapon)
     {
         PlayerWeapons playerWeapons = attacker.GetComponent<PlayerWeapons>();

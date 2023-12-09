@@ -145,5 +145,8 @@ public class PlayerWeapons : NetworkBehaviour
         return (highestLevelWeaponType, highestLevel);
     }
 
+    public Weapon GetCurrentWeapon() => GetHighestLevelWeapon();
+
+
     // Additional methods for weapon usage, cooldowns, etc., can be added here
 }
