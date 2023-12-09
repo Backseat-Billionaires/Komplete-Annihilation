@@ -1,86 +1,87 @@
 using UnityEngine;
 using Mirror;
+using System.Collections;
 
-public class Mine : NetworkBehaviour, IGameSelectable
+public class Mine : NetworkBehaviour
 {
-    public int metalPerSecond = 1;
-    public int maxHealth = 100;
-    private int currentHealth;
+    [SerializeField]
+    private GameObject mineVisualPrefab; // Prefab for the visual representation
 
     [SyncVar]
-    private GameObject ownerGameObject;
+    private GameObject owner;
 
-    private ResourceManagement resourceManagement;
-    private bool isSelected = false;
+    private const int cost = 100; // Cost to place the mine
+    private const float resourceGenerationRate = 1.0f; // 1 metal resource per second
 
-    [SerializeField]
-    private GameObject selectedIndicator;
+    private Health healthComponent;
+    private GameObject visualIndicator; // For selection indication
+    
+    private Selectable selectableComponent; // Reference to the Selectable component
+    public static int MaxActiveMinesPerPlayer = 8; // Maximum number of active mines a player can have
 
-    void Start()
+    public override void OnStartServer()
     {
-        currentHealth = maxHealth;
-
-        if (ownerGameObject != null)
+        healthComponent = GetComponent<Health>();
+        if (healthComponent == null)
         {
-            resourceManagement = ownerGameObject.GetComponent<ResourceManagement>();
+            Debug.LogError("Health component not found on mine");
         }
-
-        if (resourceManagement == null)
+        else
         {
-            Debug.LogError("ResourceManagement component not found in the owner player.");
-            return;
+            StartCoroutine(GenerateResource());
         }
-
-        InvokeRepeating(nameof(GenerateResource), 1f, 1f);
-
-        if (selectedIndicator != null)
-            selectedIndicator.SetActive(false);
-    }
-
-    void GenerateResource()
-    {
-        if (isServer && resourceManagement != null)
+        
+        selectableComponent = GetComponent<Selectable>();
+        if (selectableComponent == null)
         {
-            resourceManagement.AddMetal(metalPerSecond);
+            Debug.LogError("Selectable component not found on the Mine object");
         }
     }
 
-    public void TakeDamage(int damage)
+    private IEnumerator GenerateResource()
     {
-        currentHealth -= damage;
-        if (currentHealth <= 0 && isServer)
+        while (healthComponent != null && healthComponent.GetCurrentHealth() > 0)
         {
-            DestroyMine();
+            yield return new WaitForSeconds(resourceGenerationRate);
+            if (owner != null)
+            {
+                PlayerInventory ownerInventory = owner.GetComponent<PlayerInventory>();
+                if (ownerInventory != null)
+                {
+                    ownerInventory.AddResources(1); // Add 1 metal resource per second
+                }
+            }
         }
     }
 
     [Server]
-    private void DestroyMine()
+    public void Initialize(GameObject mineOwner, Vector3 placementPosition)
     {
-        NetworkServer.Destroy(gameObject);
-    }
+        owner = mineOwner;
+        transform.position = placementPosition;
 
-    public void Initialize(GameObject ownerGameObject)
-    {
-        this.ownerGameObject = ownerGameObject;
+        GameObject visualInstance = Instantiate(mineVisualPrefab, placementPosition, Quaternion.identity);
+        NetworkServer.Spawn(visualInstance);
+
+        visualIndicator = visualInstance; // Store reference for selection indication
     }
 
     public void Select()
     {
-        isSelected = true;
-        if (selectedIndicator != null)
-            selectedIndicator.SetActive(true);
+        if (selectableComponent != null)
+        {
+            selectableComponent.SetSelected(true); // Select using the Selectable component
+        }
     }
+
 
     public void Deselect()
     {
-        isSelected = false;
-        if (selectedIndicator != null)
-            selectedIndicator.SetActive(false);
+        if (selectableComponent != null)
+        {
+            selectableComponent.SetSelected(false); // Deselect using the Selectable component
+        }
     }
 
-    public bool IsSelected()
-    {
-        return isSelected;
-    }
+    // Additional methods or properties can be added here
 }

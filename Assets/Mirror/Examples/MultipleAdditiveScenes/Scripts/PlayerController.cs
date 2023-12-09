@@ -6,7 +6,7 @@ namespace Mirror.Examples.MultipleAdditiveScenes
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(NetworkTransformUnreliable))]
     [RequireComponent(typeof(Rigidbody))]
-    public class PlayerController : NetworkBehaviour
+    public class PPlayerController : NetworkBehaviour
     {
         public enum GroundState : byte { Jumping, Falling, Grounded }
 

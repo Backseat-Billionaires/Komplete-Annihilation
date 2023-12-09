@@ -1,41 +1,36 @@
 using UnityEngine;
-using System.Collections.Generic;
-
 
 public class SelectionManager : MonoBehaviour
 {
-    private List<IGameSelectable> selectedObjects = new List<IGameSelectable>();
+    private Camera mainCamera;
+    private Selectable currentlySelected;
 
-    public void SelectObject(GameObject obj)
+    private void Start()
     {
-        IGameSelectable selectable = obj.GetComponent<IGameSelectable>();
-        if (selectable != null)
-        {
-            if (selectable.IsSelected())
-            {
-                selectable.Deselect();
-                selectedObjects.Remove(selectable);
-            }
-            else
-            {
-                selectable.Select();
-                selectedObjects.Add(selectable);
-            }
-        }
-        EnforceSelectionRules();
+        mainCamera = Camera.main;
     }
 
-    private void EnforceSelectionRules()
+    private void Update()
     {
-        // Logic to enforce selection rules
-    }
-
-    public void DeselectAll()
-    {
-        foreach (var selectable in selectedObjects)
+        if (Input.GetMouseButtonDown(0)) // Left mouse button
         {
-            selectable.Deselect();
+            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                Selectable selectableObject = hit.collider.GetComponent<Selectable>();
+                if (selectableObject != null)
+                {
+                    if (currentlySelected != null)
+                    {
+                        currentlySelected.SetSelected(false);
+                    }
+
+                    currentlySelected = selectableObject;
+                    selectableObject.SetSelected(true);
+                }
+            }
         }
-        selectedObjects.Clear();
     }
 }

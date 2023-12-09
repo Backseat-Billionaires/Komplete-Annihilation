@@ -5,41 +5,58 @@ using UnityEngine;
 public class Map : MonoBehaviour
 {
     [SerializeField]
-    private GameObject spawnPoints;
+    private GameObject spawnPointsContainer;
 
+    private List<Transform> spawnPoints = new List<Transform>();
     private List<int> usedSpawnPoints = new List<int>();
 
-    public Vector3 GetSpawnPoint(int spawnPointIndex)
+    void Awake()
     {
-        var transforms = spawnPoints.GetComponentsInChildren<Transform>();
-        if (spawnPointIndex < 0 || spawnPointIndex >= transforms.Length - 1)
+        if (spawnPointsContainer == null)
         {
-            throw new IndexOutOfRangeException("Invalid spawn point index.");
+            Debug.LogError("Spawn Points Container is not assigned in the Inspector.");
+            return;
         }
 
-        // Offset because transforms[0] is *this* transform, not the first child.
-        return transforms[spawnPointIndex + 1].position;
+        foreach (Transform child in spawnPointsContainer.transform)
+        {
+            if (child != transform) // Ensure not to add the parent object
+            {
+                spawnPoints.Add(child);
+            }
+        }
+
+        if (spawnPoints.Count == 0)
+        {
+            Debug.LogError("No spawn points found in the Spawn Points Container.");
+        }
     }
+
+    // ... existing methods ...
 
     public Vector3 GetUniqueRandomSpawnPoint()
     {
-        var transforms = spawnPoints.GetComponentsInChildren<Transform>();
-        if (transforms.Length > 1)
+        if (spawnPoints.Count == 0)
         {
-            int randomIndex;
-            do
-            {
-                randomIndex = UnityEngine.Random.Range(1, transforms.Length);
-            } 
-            while (usedSpawnPoints.Contains(randomIndex));
-
-            usedSpawnPoints.Add(randomIndex); // Mark this spawn point as used
-            return transforms[randomIndex].position;
+            throw new InvalidOperationException("No spawn points available.");
         }
-        throw new NotImplementedException("No spawn locations defined or not enough spawn points for all players.");
+
+        if (usedSpawnPoints.Count >= spawnPoints.Count)
+        {
+            ResetUsedSpawnPoints();
+        }
+
+        int randomIndex;
+        do
+        {
+            randomIndex = UnityEngine.Random.Range(0, spawnPoints.Count);
+        } 
+        while (usedSpawnPoints.Contains(randomIndex));
+
+        usedSpawnPoints.Add(randomIndex); // Mark this spawn point as used
+        return spawnPoints[randomIndex].position;
     }
 
-    // Call this method at the end of a game or match to reset used spawn points
     public void ResetUsedSpawnPoints()
     {
         usedSpawnPoints.Clear();
