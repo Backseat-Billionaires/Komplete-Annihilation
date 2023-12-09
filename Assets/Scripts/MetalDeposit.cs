@@ -8,10 +8,10 @@ public class MetalDeposit : NetworkBehaviour
     [SyncVar]
     private bool hasMine = false;
 
-    private GameObject _mineOwner; // Reference to the player who owns the mine
+    private GameObject _mineOwner; 
     private Selectable selectableComponent;
 
-    private const int mineCost = 100; // Cost to place the mine
+    private const int mineCost = 100; 
 
     private void Awake()
     {
@@ -54,7 +54,7 @@ public class MetalDeposit : NetworkBehaviour
 
         if (!hasMine)
         {
-            ownerInventory.UseResources(mineCost); // Deduct cost from player's resources
+            ownerInventory.UseResources(mineCost); 
             GameObject newMineObject = Instantiate(minePrefab, transform.position, Quaternion.identity);
             NetworkServer.Spawn(newMineObject, owner);
             Mine newMine = newMineObject.GetComponent<Mine>();
@@ -63,7 +63,7 @@ public class MetalDeposit : NetworkBehaviour
             {
                 newMine.Initialize(owner, transform.position);
                 hasMine = true;
-                ownerInventory.IncrementActiveMines(); // Increment active mines count
+                ownerInventory.IncrementActiveMines(); 
             }
             else
             {
@@ -74,13 +74,13 @@ public class MetalDeposit : NetworkBehaviour
 
     private bool IsOwnerInRange(GameObject owner)
     {
-        float placementRange = 5.0f; // Define the range within which a mine can be placed
+        float placementRange = 5.0f; 
         return Vector3.Distance(owner.transform.position, transform.position) <= placementRange;
     }
 
     private void SendFeedbackToPlayer(GameObject player, string message)
     {
-        // Implement a method to send feedback to the player (e.g., through UI or a console log)
+
         Debug.Log(message);
     }
 
@@ -88,12 +88,12 @@ public class MetalDeposit : NetworkBehaviour
     {
         if (owner == _mineOwner)
         {
-            selectableComponent.SetSelected(true); // Use Selectable component for visual indication
+            selectableComponent.SetSelected(true); 
         }
     }
 
     public void Deselect()
     {
-        selectableComponent.SetSelected(false); // Use Selectable component for visual indication
+        selectableComponent.SetSelected(false); 
     }
 }

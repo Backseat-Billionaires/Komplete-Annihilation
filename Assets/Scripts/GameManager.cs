@@ -75,7 +75,6 @@ public class GameManager : NetworkBehaviour
                     Health winnerHealth = conn.Value.identity.GetComponent<Health>();
                     if (winnerHealth != null && winnerHealth.GetScore() > 0)
                     {
-                        // Winner found - end the game and send scores
                         EndGame();
                         break;
                     }
@@ -89,27 +88,22 @@ public class GameManager : NetworkBehaviour
     {
         foreach (var playerScore in playerScores)
         {
-            // Call HighScoreSender to send the high score
             HighScoreSender.Instance.SendHighScore(playerScore.Key.ToString(), playerScore.Value);
         }
 
-        // Optional: Implement logic to reset or conclude the game
-        // For example, reset the game state or disconnect all players
+
     }
     
     public void SetupPlayer(GameObject playerObject, NetworkConnectionToClient conn)
     {
-        // Additional player setup logic goes here
-        // Example: Initialize player score
+
         playerScores[conn.connectionId] = 0;
     }
 
     public void HandlePlayerDisconnect(GameObject playerObject)
     {
-        // Handle player disconnect logic here
-        // Example: Remove player from game and clean up
+
         NetworkServer.Destroy(playerObject);
     }
-
-    // Add additional methods here as needed
+    
 }

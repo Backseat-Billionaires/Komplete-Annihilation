@@ -8,7 +8,7 @@ public class PlayerInventory : NetworkBehaviour
     [SyncVar]
     private int bulletCount;
     [SyncVar]
-    private int activeMinesCount; // Track the number of active mines
+    private int activeMinesCount; 
 
     
     private readonly int initialBulletCount = 20;
@@ -22,7 +22,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         metalResources = initialMetalCount;
         bulletCount = initialBulletCount;
-        activeMinesCount = 0; // Initialize active mines count
+        activeMinesCount = 0; 
     }
     
     public void IncrementActiveMines()
@@ -30,7 +30,6 @@ public class PlayerInventory : NetworkBehaviour
         if (activeMinesCount < MaxActiveMinesPerPlayer)
         {
             activeMinesCount++;
-            // Optionally update clients about the change
         }
     }
     
@@ -39,7 +38,6 @@ public class PlayerInventory : NetworkBehaviour
         if (activeMinesCount > 0)
         {
             activeMinesCount--;
-            // Optionally update clients about the change
         }
     }
 
@@ -69,7 +67,6 @@ public class PlayerInventory : NetworkBehaviour
     private void RpcUpdateResourceOnClients(int newResourceAmount)
     {
         metalResources = newResourceAmount;
-        // Update UI or other elements to reflect the new resource count
     }
 
     public int GetResourceCount()
@@ -77,22 +74,20 @@ public class PlayerInventory : NetworkBehaviour
         return metalResources;
     }
 
-    [Server]
-    public void AddBullets(int amount)
-    {
-        bulletCount += amount;
-        // Update clients about the bullet count change
-    }
-
-    [Server]
-    public void UseBullets(int amount)
-    {
-        if (bulletCount >= amount)
-        {
-            bulletCount -= amount;
-            // Update clients about the bullet count change
-        }
-    }
+    // [Server]
+    // public void AddBullets(int amount)
+    // {
+    //     bulletCount += amount;
+    // }
+    //
+    // [Server]
+    // public void UseBullets(int amount)
+    // {
+    //     if (bulletCount >= amount)
+    //     {
+    //         bulletCount -= amount;
+    //     }
+    // }
 
     public int GetBulletCount() => bulletCount;
     

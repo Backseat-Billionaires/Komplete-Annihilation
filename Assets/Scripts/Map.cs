@@ -20,7 +20,7 @@ public class Map : MonoBehaviour
 
         foreach (Transform child in spawnPointsContainer.transform)
         {
-            if (child != transform) // Ensure not to add the parent object
+            if (child != transform)
             {
                 spawnPoints.Add(child);
             }
@@ -53,7 +53,7 @@ public class Map : MonoBehaviour
         } 
         while (usedSpawnPoints.Contains(randomIndex));
 
-        usedSpawnPoints.Add(randomIndex); // Mark this spawn point as used
+        usedSpawnPoints.Add(randomIndex);
         return spawnPoints[randomIndex].position;
     }
 

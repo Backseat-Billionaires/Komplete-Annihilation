@@ -5,7 +5,7 @@ using System.Text;
 
 public class HighScoreSender : MonoBehaviour
 {
-    private string apiUrl = "http://localhost:5000/add_score"; // URL of the Flask API
+    private string apiUrl = "http://localhost:5000/add_score"; // url of flask api
     public static HighScoreSender Instance { get; private set; }
 
     private void Awake()

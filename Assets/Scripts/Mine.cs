@@ -5,23 +5,23 @@ using System.Collections;
 public class Mine : NetworkBehaviour
 {
     [SerializeField]
-    private GameObject mineVisualPrefab; // Prefab for the visual representation
+    private GameObject mineVisualPrefab; 
 
     [SyncVar]
     private GameObject owner;
     
-    private const float resourceGenerationRate = 1.0f; // 1 metal resource per second
+    private const float resourceGenerationRate = 1.0f; 
 
     private Health healthComponent;
-    private GameObject visualIndicator; // For selection indication
+    private GameObject visualIndicator; 
     
-    private Selectable selectableComponent; // Reference to the Selectable component
+    private Selectable selectableComponent; 
     
     private bool isSelected;
     
     void OnMouseDown() 
     {
-        // Only allow selection interactions for the local player
+        
         if (!isOwned) return;
 
         CmdToggleSelection();
@@ -57,7 +57,7 @@ public class Mine : NetworkBehaviour
                 PlayerInventory ownerInventory = owner.GetComponent<PlayerInventory>();
                 if (ownerInventory != null)
                 {
-                    ownerInventory.AddResources(1); // Add 1 metal resource per second
+                    ownerInventory.AddResources(1); 
                 }
             }
         }
@@ -72,12 +72,12 @@ public class Mine : NetworkBehaviour
         GameObject visualInstance = Instantiate(mineVisualPrefab, placementPosition, Quaternion.identity);
         NetworkServer.Spawn(visualInstance);
 
-        visualIndicator = visualInstance; // Store reference for selection indication
+        visualIndicator = visualInstance; 
     }
 
     private void HandleMineDestruction(GameObject attacker)
     {
-        // Notify the owner's inventory to decrement the active mine count
+        
         if (owner != null)
         {
             PlayerInventory ownerInventory = owner.GetComponent<PlayerInventory>();
@@ -87,7 +87,7 @@ public class Mine : NetworkBehaviour
             }
         }
 
-        // Destroy the mine object
+      
         NetworkServer.Destroy(gameObject);
     }
 
@@ -95,7 +95,7 @@ public class Mine : NetworkBehaviour
     {
         if (selectableComponent != null)
         {
-            selectableComponent.SetSelected(true); // Select using the Selectable component
+            selectableComponent.SetSelected(true); 
             visualIndicator.SetActive(true);
         }
     }
@@ -104,7 +104,7 @@ public class Mine : NetworkBehaviour
     {
         if (selectableComponent != null)
         {
-            selectableComponent.SetSelected(false); // Deselect using the Selectable component
+            selectableComponent.SetSelected(false); 
             visualIndicator.SetActive(false);
         }
     }
@@ -112,7 +112,7 @@ public class Mine : NetworkBehaviour
     [Command]
     private void CmdToggleSelection()
     {
-        //Toggle selection state on the server
+        
         if (isSelected)
         {
             Deselect();

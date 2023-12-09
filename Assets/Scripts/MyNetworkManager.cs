@@ -10,7 +10,7 @@ public class MyNetworkManager : NetworkManager
         {
             GameObject playerObject = Instantiate(playerPrefab);
             NetworkServer.AddPlayerForConnection(conn, playerObject);
-            gameManager.SetupPlayer(playerObject, conn); // Additional setup for player
+            gameManager.SetupPlayer(playerObject, conn); 
         }
         else
         {

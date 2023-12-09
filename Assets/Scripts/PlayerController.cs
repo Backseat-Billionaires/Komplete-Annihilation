@@ -8,15 +8,13 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private LayerMask interactableLayer;
     [SerializeField]
-    private int attackDamage = 10;
-    [SerializeField]
-    private float attackRange = 2f;
+    private LayerMask enemyLayer; 
 
     private Camera playerCamera;
     private MetalDeposit selectedMetalDeposit;
     private CharacterController characterController;
     private Health healthComponent;
-    private Map map;
+    private PlayerWeapons playerWeapons;
 
     void Start()
     {
@@ -24,9 +22,15 @@ public class PlayerController : NetworkBehaviour
         {
             playerCamera = Camera.main;
             characterController = GetComponent<CharacterController>();
+            playerWeapons = GetComponent<PlayerWeapons>();
+
             if (characterController == null)
             {
                 Debug.LogError("CharacterController is not attached to the player");
+            }
+            if (playerWeapons == null)
+            {
+                Debug.LogError("PlayerWeapons component not found on the player");
             }
         }
 
@@ -44,21 +48,20 @@ public class PlayerController : NetworkBehaviour
         HandleMovement();
         HandleInteractionInput();
         HandleMinePlacementInput();
-        HandleAttackInput();
+        HandleMouseClickAttackInput();
     }
+
     private void HandleMovement()
     {
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-
-        float adjustedSpeed = movementSpeed * Time.deltaTime;
-        Vector3 movement = new Vector3(horizontal, 0, vertical) * adjustedSpeed;
+        Vector3 movement = new Vector3(horizontal, 0, vertical) * (movementSpeed * Time.deltaTime);
         characterController.Move(movement);
     }
 
     private void HandleInteractionInput()
     {
-        if (Input.GetKeyDown(KeyCode.E)) // Assuming 'E' is the key for interaction
+        if (Input.GetKeyDown(KeyCode.E)) // E key for interaction
         {
             TryInteract();
         }
@@ -66,79 +69,95 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleMinePlacementInput()
     {
-        if (Input.GetKeyDown(KeyCode.M) && selectedMetalDeposit != null) // Assuming 'M' is the key for mine placement
+        if (Input.GetKeyDown(KeyCode.M) && selectedMetalDeposit != null) // M key for mine placement
         {
             CmdTryPlaceMine(selectedMetalDeposit.gameObject);
         }
     }
 
-    private void HandleAttackInput()
+    public void HandleMouseClickAttackInput()
     {
-        if (Input.GetKeyDown(KeyCode.F)) // Assuming 'F' is the key for attack
+        if (Input.GetMouseButtonDown(0)) // Left mouse button
         {
-            TryAttack();
-        }
-    }
-
-    private void TryAttack()
-    {
-        if (TryGetTarget(out RaycastHit hit, attackRange))
-        {
-            GameObject target = hit.collider.gameObject;
-
-            // Retrieve the PlayerWeapons component and get the current weapon
-            PlayerWeapons playerWeapons = GetComponent<PlayerWeapons>();
-            Weapon currentWeapon = playerWeapons.GetCurrentWeapon(); // Assuming GetCurrentWeapon() is implemented
-
-            // Use CombatManager to handle the attack
-            CombatManager.Instance.PerformAttack(gameObject, target, currentWeapon);
-        }
-    }
-
-    private bool TryGetTarget(out RaycastHit hit, float range)
-    {
-        return Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, range, interactableLayer);
-    }
-
-    
-    [Command]
-    private void CmdAttackMine(GameObject mineObj)
-    {
-        Mine mine = mineObj.GetComponent<Mine>();
-        if (mine != null)
-        {
-            Health mineHealth = mine.GetComponent<Health>();
-            if (mineHealth != null)
+            RaycastHit hit;
+            if (Physics.Raycast(playerCamera.ScreenPointToRay(Input.mousePosition), out hit, 100f, interactableLayer))
             {
-                mineHealth.TakeDamage(attackDamage, gameObject); // gameObject is the attacker
+                NetworkIdentity hitIdentity = hit.collider.gameObject.GetComponent<NetworkIdentity>();
+                Mine hitMine = hit.collider.gameObject.GetComponent<Mine>();
+                
+                if (hitMine != null && hitIdentity != null && hitIdentity.connectionToClient != connectionToClient)
+                {
+                    AttackTarget(hit.collider.gameObject);
+                }
+                else if (hitIdentity != null && hitIdentity.connectionToClient != connectionToClient)
+                {
+                    AttackTarget(hit.collider.gameObject);
+                }
             }
         }
     }
+
+    private void AttackTarget(GameObject target)
+    {
+        // Get the currently equipped weapon
+        Weapon currentWeapon = playerWeapons.GetCurrentWeapon();
+
+        // Fire the weapon
+        playerWeapons.FireWeapon(currentWeapon.weaponName);
+
+        // Attack the target
+        CmdAttack(target);
+    }
+
+
+
+
+    [Command]
+    private void CmdAttack(GameObject target)
+    {
+        Weapon currentWeapon = playerWeapons.GetCurrentWeapon();
+        string weaponName = currentWeapon.weaponName;
+
+        if (playerWeapons.HasAmmo(weaponName))
+        {
+            CombatManager.Instance.PerformAttack(gameObject, target, currentWeapon);
+        }
+        else 
+        {
+            
+            playerWeapons.ReloadWeapon(weaponName); 
+        }
+    }
+
 
     private void TryInteract()
     {
         RaycastHit hit;
         if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, 2f, interactableLayer))
         {
-            MetalDeposit metalDeposit = hit.collider.GetComponent<MetalDeposit>();
-            Mine mine = hit.collider.GetComponent<Mine>();
+            HandleInteraction(hit.collider.gameObject);
+        }
+    }
 
-            if (metalDeposit != null && IsWithinInteractRange(metalDeposit.gameObject))
-            {
-                CmdInteractWithMetalDeposit(metalDeposit.gameObject);
-                selectedMetalDeposit = metalDeposit; // Store the selected metal deposit
-            }
-            else if (mine != null && IsWithinInteractRange(mine.gameObject))
-            {
-                CmdInteractWithMine(mine.gameObject);
-            }
+    private void HandleInteraction(GameObject hitObject)
+    {
+        MetalDeposit metalDeposit = hitObject.GetComponent<MetalDeposit>();
+        Mine mine = hitObject.GetComponent<Mine>();
+
+        if (metalDeposit != null && IsWithinInteractRange(hitObject))
+        {
+            CmdInteractWithMetalDeposit(metalDeposit.gameObject);
+            selectedMetalDeposit = metalDeposit;
+        }
+        else if (mine != null && IsWithinInteractRange(hitObject))
+        {
+            CmdInteractWithMine(mine.gameObject);
         }
     }
 
     private bool IsWithinInteractRange(GameObject target)
     {
-        float interactRange = 5.0f; // Define the interaction range
-        return Vector3.Distance(transform.position, target.transform.position) <= interactRange;
+        return Vector3.Distance(transform.position, target.transform.position) <= 5f;
     }
 
     [Command]
@@ -147,7 +166,7 @@ public class PlayerController : NetworkBehaviour
         MetalDeposit metalDeposit = obj.GetComponent<MetalDeposit>();
         if (metalDeposit != null)
         {
-            metalDeposit.Select(gameObject); // Passing the player GameObject as the owner
+            metalDeposit.Select(gameObject); 
         }
     }
 
@@ -157,7 +176,7 @@ public class PlayerController : NetworkBehaviour
         Mine mine = obj.GetComponent<Mine>();
         if (mine != null)
         {
-            mine.Select(); // Or any other specific interaction logic
+            mine.Select(); 
         }
     }
 
@@ -167,7 +186,7 @@ public class PlayerController : NetworkBehaviour
         MetalDeposit metalDeposit = metalDepositObj.GetComponent<MetalDeposit>();
         if (metalDeposit != null && metalDeposit.gameObject == selectedMetalDeposit.gameObject)
         {
-            metalDeposit.TryPlaceMine(gameObject); // Attempt to place a mine
+            metalDeposit.TryPlaceMine(gameObject); 
         }
     }
 

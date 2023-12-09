@@ -16,20 +16,29 @@ public class CombatManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     public void PerformAttack(GameObject attacker, GameObject target, Weapon currentWeapon)
     {
         PlayerWeapons playerWeapons = attacker.GetComponent<PlayerWeapons>();
-        if (playerWeapons == null || !playerWeapons.UseAmmo(currentWeapon.weaponName))
+        if (playerWeapons == null)
         {
+            Debug.LogError("PlayerWeapons component not found on the attacker");
             return;
         }
 
+        // check if the player has ammo for the current weapon
+        if (!playerWeapons.UseAmmo(currentWeapon.weaponName)) 
+        {
+            Debug.Log("No ammo left to perform an attack.");
+            return;
+        }
+
+        // perform attack if target is in range and visible
         if (IsTargetInRangeAndVisible(attacker, target, currentWeapon.BaseRange))
         {
             Health targetHealth = target.GetComponent<Health>();
             if (targetHealth != null)
             {
-                // Now passing both the damage amount and the attacker to the TakeDamage method
                 targetHealth.TakeDamage(currentWeapon.BaseDamage, attacker);
             }
         }
@@ -51,6 +60,5 @@ public class CombatManager : MonoBehaviour
 
         return false;
     }
-
-    // Additional combat-related methods can be added here
+    
 }

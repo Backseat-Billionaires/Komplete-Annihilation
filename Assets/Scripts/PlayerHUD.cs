@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,28 +8,18 @@ public class PlayerHUD : MonoBehaviour
     public HealthBar healthBar;
 
     [Header("Resource Indicators")]
-    public Text metalCountText;
-    public Text mineCountText;
-    public Text bulletCountText;
-    public Text weaponText;
-    public Text currentLives;
-    public Text deathCount;
-    public Text score;
+    public TextMeshProUGUI metalCountText;
+    public TextMeshProUGUI mineCountText;
+    public TextMeshProUGUI bulletCountText;
+    public TextMeshProUGUI weaponText;
+    public TextMeshProUGUI currentLives;
+    public TextMeshProUGUI deathCount;
+    public TextMeshProUGUI score;
 
     private PlayerInventory playerInventory;
     private PlayerController playerController;
     private PlayerWeapons weapons;
     private Health healthComponent;
-
-    // Variables for tracking changes
-    private int lastHealth;
-    private int lastMetalCount;
-    private int lastMineCount;
-    private int lastBulletCount;
-    private string lastWeaponInfo;
-    private int lastCurrentLives;
-    private int lastDeathCount;
-    private int lastScore;
 
     void Start()
     {
@@ -42,52 +33,44 @@ public class PlayerHUD : MonoBehaviour
             Debug.LogError("Essential components (PlayerInventory, PlayerController, PlayerWeapons, Health) not found on the player object");
             return;
         }
-
+        
         healthBar.SetMaxHealth(healthComponent.GetMaxHealth());
-        UpdateHUD(); // Initial update
+        UpdateHUD(); 
     }
 
     void Update()
     {
-        if (healthComponent.GetCurrentHealth() != lastHealth ||
-            playerInventory.GetResourceCount() != lastMetalCount ||
-            playerInventory.GetActiveMines() != lastMineCount ||
-            playerInventory.GetBulletCount() != lastBulletCount ||
-            healthComponent.GetCurrentLives() != lastCurrentLives ||
-            healthComponent.GetDeathCount() != lastDeathCount ||
-            healthComponent.GetScore() != lastScore ||
-            weapons.GetHighestLevelWeaponInfo().Item1 != lastWeaponInfo)
+        if (CheckForUpdates())
         {
             UpdateHUD();
         }
     }
 
-    private void UpdateHUD() 
+    private bool CheckForUpdates()
     {
-        (string weaponName, int weaponLevel) = weapons.GetHighestLevelWeaponInfo();
-        lastWeaponInfo = $"{weaponName}, Level: {weaponLevel}";
-
-        lastHealth = healthComponent.GetCurrentHealth();
-        healthBar.SetHealth(lastHealth);
-
-        lastMetalCount = playerInventory.GetResourceCount();
-        metalCountText.text = $"Metal: {lastMetalCount}";
-
-        lastMineCount = playerInventory.GetActiveMines();
-        mineCountText.text = $"Mines: {lastMineCount} / {PlayerInventory.MaxActiveMinesPerPlayer}";
-
-        lastBulletCount = playerInventory.GetBulletCount();
-        bulletCountText.text = $"Bullets: {lastBulletCount}";
-
-        lastCurrentLives = healthComponent.GetCurrentLives();
-        currentLives.text = $"Lives: {lastCurrentLives}";
-
-        lastDeathCount = healthComponent.GetDeathCount();
-        deathCount.text = $"Death Counter: {lastDeathCount} / {healthComponent.GetMaxRespawns()}";
-
-        lastScore = healthComponent.GetScore();
-        score.text = $"Score: {lastScore}";
+        return healthComponent.GetCurrentHealth() != healthBar.GetCurrentHealth() ||
+               playerInventory.GetResourceCount().ToString() != metalCountText.text ||
+               playerInventory.GetActiveMines().ToString() != mineCountText.text ||
+               playerInventory.GetBulletCount().ToString() != bulletCountText.text ||
+               healthComponent.GetCurrentLives().ToString() != currentLives.text ||
+               healthComponent.GetDeathCount().ToString() != deathCount.text ||
+               healthComponent.GetScore().ToString() != score.text ||
+               weapons.GetHighestLevelWeaponInfo().Item1 != weaponText.text;
     }
 
-    // Additional methods for HUD updates can be added here
+
+    private void UpdateHUD()
+    {
+        healthBar.SetHealth(healthComponent.GetCurrentHealth());
+        metalCountText.text = $"Metal: {playerInventory.GetResourceCount()}";
+        mineCountText.text = $"Mines: {playerInventory.GetActiveMines()} / {PlayerInventory.MaxActiveMinesPerPlayer}";
+        bulletCountText.text = $"Bullets: {playerInventory.GetBulletCount()}";
+
+        var weaponInfo = weapons.GetHighestLevelWeaponInfo();
+        weaponText.text = $"Weapon: {weaponInfo.Item1}, Level: {weaponInfo.Item2}";
+
+        currentLives.text = $"Lives: {healthComponent.GetCurrentLives()}";
+        deathCount.text = $"Death Count: {healthComponent.GetDeathCount()}/{healthComponent.GetMaxRespawns()}";
+        score.text = $"Score: {healthComponent.GetScore()}";
+    }
 }

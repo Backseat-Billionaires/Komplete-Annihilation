@@ -4,8 +4,8 @@ public class CameraController : MonoBehaviour
 {
     public Transform target;
     public Vector3 offset = new Vector3(0, 10, -10);
-    public float minZoom = 10f;
-    public float maxZoom = 20f;
+    public float minZoom = 20f;
+    public float maxZoom = 50f;
     public float zoomLerpSpeed = 10f;
 
     private Camera cam;

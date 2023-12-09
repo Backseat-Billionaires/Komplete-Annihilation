@@ -1,7 +1,7 @@
 using UnityEngine;
 using Mirror;
-using System;
 using System.Collections;
+using System;
 
 public class Health : NetworkBehaviour
 {
@@ -17,19 +17,21 @@ public class Health : NetworkBehaviour
     private int currentLives;
     [SyncVar]
     private int deathCount;
-
-    public event Action<GameObject> OnDeath;
-
     [SyncVar]
     private int score;
+    [SyncVar]
+    private int killCount;
 
     private GameManager gameManager;
+
+    public event Action<GameObject> OnDeath;
 
     public override void OnStartServer()
     {
         currentHealth = maxHealth;
         currentLives = maxRespawns;
         deathCount = 0;
+        killCount = 0;
         gameManager = FindObjectOfType<GameManager>();
     }
 
@@ -45,7 +47,7 @@ public class Health : NetworkBehaviour
             OnDeath?.Invoke(attacker);
             deathCount++;
 
-            if (IsPlayer())
+            if (IsPlayerCharacter())
             {
                 HandlePlayerDeath(attacker);
             }
@@ -56,9 +58,9 @@ public class Health : NetworkBehaviour
         }
     }
 
-    private bool IsPlayer()
+    private bool IsPlayerCharacter()
     {
-        return GetComponent<CharacterController>() != null;
+        return GetComponent<PlayerController>() != null;
     }
 
     [Server]
@@ -67,7 +69,7 @@ public class Health : NetworkBehaviour
         currentLives--;
         if (currentLives <= 0)
         {
-            gameManager.RecordPlayerDeath(connectionToClient); // Inform GameManager of player elimination
+            gameManager.RecordPlayerDeath(connectionToClient);
         }
 
         if (attacker != null)
@@ -76,6 +78,7 @@ public class Health : NetworkBehaviour
             if (attackerHealth != null)
             {
                 attackerHealth.IncrementScore();
+                attackerHealth.IncrementKillCount();
             }
         }
 
@@ -93,6 +96,28 @@ public class Health : NetworkBehaviour
     private void IncrementScore()
     {
         score += 1000;
+    }
+
+    [Server]
+    private void IncrementKillCount()
+    {
+        killCount++;
+        CheckForWeaponUpgrade();
+    }
+
+    [Server]
+    private void CheckForWeaponUpgrade()
+    {
+        const int KillsForUpgrade = 3;
+        if (killCount >= KillsForUpgrade)
+        {
+            var playerWeapons = GetComponent<PlayerWeapons>();
+            if (playerWeapons != null)
+            {
+                playerWeapons.UpgradeWeapon(playerWeapons.GetCurrentWeapon().weaponName);
+                killCount = 0;
+            }
+        }
     }
 
     private IEnumerator RespawnPlayer()

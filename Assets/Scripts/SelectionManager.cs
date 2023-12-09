@@ -33,7 +33,6 @@ public class SelectionManager : MonoBehaviour
                 }
                 else if (currentlySelected != null)
                 {
-                    // Clicked on non-selectable area, deselect current
                     currentlySelected.SetSelected(false);
                     currentlySelected = null;
                 }
