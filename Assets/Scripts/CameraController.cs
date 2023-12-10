@@ -17,6 +17,13 @@ public class CameraController : MonoBehaviour
         if (cam == null)
         {
             Debug.LogError("Camera component not found on the object");
+            return;
+        }
+
+        if (target == null)
+        {
+            Debug.LogWarning("Target not set for CameraController");
+            return;
         }
 
         targetZoom = cam.orthographicSize;
@@ -36,10 +43,9 @@ public class CameraController : MonoBehaviour
         target = newTarget;
     }
 
-    public void SetZoomLevel(float weaponRange, float maxWeaponRange)
+    public void SetZoomLevel(float weaponRange)
     {
-        // Map weapon range to zoom level, clamping within min and max zoom
-        targetZoom = Mathf.Clamp(Mathf.Lerp(minZoom, maxZoom, weaponRange / maxWeaponRange), minZoom, maxZoom);
+        targetZoom = Mathf.Clamp(Mathf.Lerp(minZoom, maxZoom, .8F), minZoom, maxZoom);
     }
 
     private void AdjustZoom()

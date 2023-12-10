@@ -3,9 +3,9 @@ using UnityEngine;
 public class Selectable : MonoBehaviour
 {
     [SerializeField]
-    private GameObject selectedIndicator;
+    private GameObject selectedIndicator; 
 
-    private bool isSelected = false; // Track selection state
+    private bool isSelected = false; 
 
     private void Start()
     {
@@ -18,6 +18,7 @@ public class Selectable : MonoBehaviour
     public void SetSelected(bool selected)
     {
         isSelected = selected;
+        
         if (selectedIndicator != null)
         {
             selectedIndicator.SetActive(selected);
@@ -28,4 +29,5 @@ public class Selectable : MonoBehaviour
     {
         return isSelected;
     }
+    
 }

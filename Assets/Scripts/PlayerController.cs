@@ -8,7 +8,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private LayerMask interactableLayer;
     [SerializeField]
-    private LayerMask enemyLayer; 
+    private LayerMask enemyLayer;
 
     private Camera playerCamera;
     private MetalDeposit selectedMetalDeposit;
@@ -20,7 +20,16 @@ public class PlayerController : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            playerCamera = Camera.main;
+            playerCamera = GetComponentInChildren<Camera>();
+            if (playerCamera != null)
+            {
+                playerCamera.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogError("Player Camera not found in the player prefab");
+            }
+
             characterController = GetComponent<CharacterController>();
             playerWeapons = GetComponent<PlayerWeapons>();
 
@@ -32,6 +41,21 @@ public class PlayerController : NetworkBehaviour
             {
                 Debug.LogError("PlayerWeapons component not found on the player");
             }
+
+            
+            gameObject.layer = LayerMask.NameToLayer("Enemy");
+            // Initialize HUD
+            PlayerHUD hud = GetComponentInChildren<PlayerHUD>();
+            if (hud != null)
+            {
+                hud.SetPlayerComponents(GetComponent<PlayerInventory>(), this, GetComponent<PlayerWeapons>(), GetComponent<Health>());
+            }
+        }
+        else
+        {
+            
+            Camera playerCam = GetComponentInChildren<Camera>();
+            if (playerCam != null) playerCam.gameObject.SetActive(false);
         }
 
         healthComponent = GetComponent<Health>();
@@ -40,6 +64,7 @@ public class PlayerController : NetworkBehaviour
             Debug.LogError("Health component not found on the player");
         }
     }
+
 
     void Update()
     {
@@ -61,7 +86,7 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleInteractionInput()
     {
-        if (Input.GetKeyDown(KeyCode.E)) // E key for interaction
+        if (Input.GetKeyDown(KeyCode.E))
         {
             TryInteract();
         }
@@ -69,27 +94,21 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleMinePlacementInput()
     {
-        if (Input.GetKeyDown(KeyCode.M) && selectedMetalDeposit != null) // M key for mine placement
+        if (Input.GetKeyDown(KeyCode.M) && selectedMetalDeposit != null)
         {
             CmdTryPlaceMine(selectedMetalDeposit.gameObject);
         }
     }
 
-    public void HandleMouseClickAttackInput()
+    private void HandleMouseClickAttackInput()
     {
-        if (Input.GetMouseButtonDown(0)) // Left mouse button
+        if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;
-            if (Physics.Raycast(playerCamera.ScreenPointToRay(Input.mousePosition), out hit, 100f, interactableLayer))
+            if (Physics.Raycast(playerCamera.ScreenPointToRay(Input.mousePosition), out hit, 100f, enemyLayer))
             {
                 NetworkIdentity hitIdentity = hit.collider.gameObject.GetComponent<NetworkIdentity>();
-                Mine hitMine = hit.collider.gameObject.GetComponent<Mine>();
-                
-                if (hitMine != null && hitIdentity != null && hitIdentity.connectionToClient != connectionToClient)
-                {
-                    AttackTarget(hit.collider.gameObject);
-                }
-                else if (hitIdentity != null && hitIdentity.connectionToClient != connectionToClient)
+                if (hitIdentity != null && hitIdentity.connectionToClient != connectionToClient)
                 {
                     AttackTarget(hit.collider.gameObject);
                 }
@@ -99,18 +118,10 @@ public class PlayerController : NetworkBehaviour
 
     private void AttackTarget(GameObject target)
     {
-        // Get the currently equipped weapon
         Weapon currentWeapon = playerWeapons.GetCurrentWeapon();
-
-        // Fire the weapon
         playerWeapons.FireWeapon(currentWeapon.weaponName);
-
-        // Attack the target
         CmdAttack(target);
     }
-
-
-
 
     [Command]
     private void CmdAttack(GameObject target)
@@ -124,7 +135,6 @@ public class PlayerController : NetworkBehaviour
         }
         else 
         {
-            
             playerWeapons.ReloadWeapon(weaponName); 
         }
     }
@@ -189,9 +199,4 @@ public class PlayerController : NetworkBehaviour
             metalDeposit.TryPlaceMine(gameObject); 
         }
     }
-
-
-
-
-    
 }

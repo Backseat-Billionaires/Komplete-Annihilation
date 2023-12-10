@@ -81,9 +81,26 @@ public class PlayerWeapons : NetworkBehaviour
         {
             weaponLevels[weaponType]++;
             RpcUpdateWeaponOnClients(weaponType, weaponLevels[weaponType]);
+
+            // Adjust camera zoom level
+            AdjustCameraZoom(weaponType);
+
             return true;
         }
         return false;
+    }
+    
+    private void AdjustCameraZoom(string weaponType)
+    {
+        if (isLocalPlayer)
+        {
+            CameraController cameraController = GetComponentInChildren<CameraController>();
+            if (cameraController != null && weapons.ContainsKey(weaponType))
+            {
+                Weapon weapon = weapons[weaponType];
+                cameraController.SetZoomLevel(weapon.BaseRange); // maxWeaponRange needs to be defined
+            }
+        }
     }
     
     [Server]
