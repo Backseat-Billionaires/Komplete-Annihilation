@@ -24,6 +24,13 @@ public class PlayerController : NetworkBehaviour
             if (playerCamera != null)
             {
                 playerCamera.gameObject.SetActive(true);
+
+                // Set the camera for the SelectionManager
+                SelectionManager selectionManager = FindObjectOfType<SelectionManager>();
+                if (selectionManager != null)
+                {
+                    selectionManager.SetCamera(playerCamera);
+                }
             }
             else
             {
@@ -42,8 +49,8 @@ public class PlayerController : NetworkBehaviour
                 Debug.LogError("PlayerWeapons component not found on the player");
             }
 
-            
             gameObject.layer = LayerMask.NameToLayer("Enemy");
+
             // Initialize HUD
             PlayerHUD hud = GetComponentInChildren<PlayerHUD>();
             if (hud != null)
@@ -53,7 +60,6 @@ public class PlayerController : NetworkBehaviour
         }
         else
         {
-            
             Camera playerCam = GetComponentInChildren<Camera>();
             if (playerCam != null) playerCam.gameObject.SetActive(false);
         }
@@ -64,6 +70,7 @@ public class PlayerController : NetworkBehaviour
             Debug.LogError("Health component not found on the player");
         }
     }
+
 
 
     void Update()

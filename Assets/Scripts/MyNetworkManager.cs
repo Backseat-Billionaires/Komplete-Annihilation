@@ -5,17 +5,16 @@ public class MyNetworkManager : NetworkManager
 {
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        GameManager gameManager = GameManager.Instance;
-        if (gameManager != null)
-        {
-            GameObject playerObject = Instantiate(playerPrefab);
-            NetworkServer.AddPlayerForConnection(conn, playerObject);
-            gameManager.SetupPlayer(playerObject, conn); 
-        }
-        else
-        {
-            Debug.LogError("GameManager not found in the scene.");
-        }
+        Vector3 spawnPoint = GetSpawnPoint();
+
+        // Instantiate the player object
+        GameObject playerObj = Instantiate(playerPrefab, spawnPoint, Quaternion.identity);
+        
+
+        // Add the player object to the connection
+        NetworkServer.AddPlayerForConnection(conn, playerObj);
+
+
     }
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
@@ -28,7 +27,15 @@ public class MyNetworkManager : NetworkManager
                 gameManager.HandlePlayerDisconnect(conn.identity.gameObject);
             }
         }
+        
+   
 
         base.OnServerDisconnect(conn);
+    }
+    
+    private Vector3 GetSpawnPoint()
+    {
+
+        return new Vector3(0, 0, 0); // Placeholder
     }
 }

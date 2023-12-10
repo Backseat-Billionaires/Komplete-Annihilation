@@ -110,7 +110,7 @@ public class Mine : NetworkBehaviour
     }
     
     [Command]
-    private void CmdToggleSelection()
+    private void CmdToggleSelection() 
     {
         
         if (isSelected)

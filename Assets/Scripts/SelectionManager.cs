@@ -2,20 +2,20 @@ using UnityEngine;
 
 public class SelectionManager : MonoBehaviour
 {
-    private Camera mainCamera;
+    private Camera playerCamera;
     private Selectable currentlySelected;
     public LayerMask selectableLayer; // Layer for selectable objects
 
-    private void Start()
+    public void SetCamera(Camera camera)
     {
-        mainCamera = Camera.main;
+        playerCamera = camera;
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // Left mouse button
+        if (Input.GetMouseButtonDown(0) && playerCamera != null) // Left mouse button
         {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, selectableLayer))

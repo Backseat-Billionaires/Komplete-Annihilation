@@ -52,15 +52,18 @@ public class PlayerHUD : MonoBehaviour
 
     private bool CheckForUpdates()
     {
-        return healthComponent.GetCurrentHealth() != lastHealth ||
-               playerInventory.GetResourceCount() != lastMetalCount ||
-               playerInventory.GetActiveMines() != lastMineCount ||
-               playerInventory.GetBulletCount() != lastBulletCount ||
-               healthComponent.GetCurrentLives() != lastCurrentLives ||
-               healthComponent.GetDeathCount() != lastDeathCount ||
-               healthComponent.GetScore() != lastScore ||
-               weapons.GetHighestLevelWeaponInfo().Item1 != lastWeaponInfo;
+        bool healthChanged = healthComponent != null && healthComponent.GetCurrentHealth() != lastHealth;
+        bool metalCountChanged = playerInventory != null && playerInventory.GetResourceCount() != lastMetalCount;
+        bool mineCountChanged = playerInventory != null && playerInventory.GetActiveMines() != lastMineCount;
+        bool bulletCountChanged = playerInventory != null && playerInventory.GetBulletCount() != lastBulletCount;
+        bool livesChanged = healthComponent != null && healthComponent.GetCurrentLives() != lastCurrentLives;
+        bool deathCountChanged = healthComponent != null && healthComponent.GetDeathCount() != lastDeathCount;
+        bool scoreChanged = healthComponent != null && healthComponent.GetScore() != lastScore;
+        bool weaponChanged = weapons != null && weapons.GetHighestLevelWeaponInfo().Item1 != lastWeaponInfo;
+
+        return healthChanged || metalCountChanged || mineCountChanged || bulletCountChanged || livesChanged || deathCountChanged || scoreChanged || weaponChanged;
     }
+
 
     private void UpdateHUD()
     {
