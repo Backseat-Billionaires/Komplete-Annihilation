@@ -1,8 +1,35 @@
-# Komplete Annihilation
-Team Project for BYU-I CSE 310
+# Overview
 
-Inspired by the incredible 1999 RTS Total Annihilation by Cavedog Entertainment
+This project is a team collaboration to create a working RTS game based heavily on the 1999 RTS Total Annihilation by Cavedog Entertainment.
 
-# Reference for Team Members:
+[Software Demo Video](http://youtube.link.goes.here)
 
-* To load the current game scene in Unity, open the `Assets/Scenes/` folder and use the `Game` scene and then run.
+# Development Environment
+
+* Unity 2022
+* Visual Studio 2022
+* C#
+
+# Collaborators
+
+* Aaron Fox
+* Seth Linares
+* Conner Reynolds
+* Codi Carlile
+
+# Useful Websites
+
+* [A* Pathfinding Project](https://arongranberg.com/astar/docs/)
+* [Unity Docs](https://docs.unity.com/)
+
+# Future Work
+
+* Building units
+* Factories
+* Artillery
+* Combat
+* Tanks
+* Aircraft
+* Multiple teams/alliances
+* Statistics tracked throughout gameplay
+* Game over
